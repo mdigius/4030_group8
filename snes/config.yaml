@@ -1,0 +1,77 @@
+# ─────────────────────────────────────────────────────────────
+#  Super Mario Kart — RL Training Configuration
+#  agent: 'ppo' | 'dueling' | 'double_dqn'
+# ─────────────────────────────────────────────────────────────
+
+agent: ppo  # ppo | dueling | double_dqn
+
+env:
+  game:      SuperMarioKart-Snes
+  state:     mario2  # TimeTrial | rbroad | MarioCircuit_M | peach | mario2
+  num_envs:  8       # 4 parallel envs
+  grayscale: true   # true = 1 channel per frame (4 total); false = RGB (12 total)
+  n_features: 5     # [checkpoint_norm, speed_norm, surface_norm, vx_norm, vy_norm]
+
+# ─────────────────────────────────────────────────────────────
+#  Shared training settings (epochs, logging)
+#  step_per_collect and batch_size live in each agent's section
+#  because optimal values differ significantly between on-policy
+#  (PPO) and off-policy (DQN) algorithms.
+# ─────────────────────────────────────────────────────────────
+training:
+  epochs:         300
+  step_per_epoch: 10000
+  buffer_size:    50000   # off-policy (DQN) only
+  log_path:       /code/logs
+
+# ─────────────────────────────────────────────────────────────
+#  PPO hyperparameters
+# ─────────────────────────────────────────────────────────────
+ppo:
+  lr:                 0.00025   # standard Atari PPO lr
+  gamma:              0.99      # standard
+  gae_lambda:         0.95      # standard — longer credit assignment
+  eps_clip:           0.1       # tighter clip — more conservative updates
+  vf_coef:            0.5       # standard
+  ent_coef:           0.01      # standard Atari value — don't keep agent random too long
+  ent_coef_end:       0.001     # small but non-zero at end
+  max_grad_norm:      0.5       # standard
+  hidden_dim:         512
+  # On-policy rollout settings
+  step_per_collect:   20000     # T: 8 envs × 2500 steps each — ensures multiple complete episodes per collect
+  repeat_per_collect: 4         # K: standard PPO
+  batch_size:         512       # M: scaled to rollout size
+
+# ─────────────────────────────────────────────────────────────
+#  Dueling DQN hyperparameters
+# ─────────────────────────────────────────────────────────────
+dueling:
+  lr:                 0.0001
+  gamma:              0.99
+  n_step:             3
+  target_update_freq: 500
+  hidden_dim:         256
+  eps_train_start:    0.5
+  eps_train_end:      0.05
+  eps_decay_steps:    200000
+  # Off-policy collector settings
+  step_per_collect:   200
+  update_per_step:    0.5
+  batch_size:         128
+
+# ─────────────────────────────────────────────────────────────
+#  Double DQN hyperparameters
+# ─────────────────────────────────────────────────────────────
+double_dqn:
+  lr:                 0.0001
+  gamma:              0.99
+  n_step:             3
+  target_update_freq: 500
+  hidden_dim:         256
+  eps_train_start:    0.5
+  eps_train_end:      0.05
+  eps_decay_steps:    200000
+  # Off-policy collector settings
+  step_per_collect:   200
+  update_per_step:    0.5
+  batch_size:         128

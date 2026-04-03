@@ -1,8 +1,0 @@
-numpy
-torch
-gymnasium
-pyyaml
-matplotlib
-dolphin-memory-engine
-psutil
-python-dotenv
