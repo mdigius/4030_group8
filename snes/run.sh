@@ -4,7 +4,7 @@ set -e
 
 CORE_INSTALL='cp /code/snes9x_libretro_fixed.so /opt/conda/envs/dev/lib/python3.10/site-packages/retro/cores/snes9x_libretro.so'
 PYTHON='/opt/conda/envs/dev/bin/python'
-PIP_DEPS="${PYTHON} -m pip install pyyaml -q"
+PIP_DEPS="${PYTHON} -m pip install pyyaml stable-baselines3[extra] -q"
 
 # Patch Tianshou segtree: replace the assertion with a safe clip so that
 # PrioritizedVectorReplayBuffer doesn't crash on fp-precision edge cases.
@@ -24,7 +24,7 @@ else:
 if [ "$1" = "--scan" ]; then
   CMD="${CORE_INSTALL} && ${PIP_DEPS} && ${PYTHON} /code/scripts/setup_game.py && ${PYTHON} /code/scripts/scan_ram.py"
 elif [ "$1" = "--r" ]; then
-  rm -f checkpoints/policy_*.pth checkpoints/policy_*_best_rew.txt
+  rm -f checkpoints/policy_*.zip checkpoints/policy_*_best.zip checkpoints/policy_*_best_rew.txt
   rm -rf logs/
   echo "Checkpoints, best reward, and logs cleared."
   CMD="${CORE_INSTALL} && ${PIP_DEPS} && ${PATCH_SEGTREE} && ${PYTHON} /code/scripts/setup_game.py && ${PYTHON} /code/train.py"

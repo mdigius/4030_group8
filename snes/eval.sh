@@ -10,7 +10,13 @@ export DISPLAY=:0
 
 CORE_INSTALL='cp /code/snes9x_libretro_fixed.so /opt/conda/envs/dev/lib/python3.10/site-packages/retro/cores/snes9x_libretro.so'
 PYTHON='/opt/conda/envs/dev/bin/python'
-PIP_DEPS="${PYTHON} -m pip install pyyaml -q"
+PIP_DEPS="${PYTHON} -m pip install pyyaml stable-baselines3[extra] -q"
+
+# Preserve optional CLI args (for example: --episodes 1) when passing through docker -c.
+EXTRA_ARGS=""
+if [ "$#" -gt 0 ]; then
+  EXTRA_ARGS=$(printf ' %q' "$@")
+fi
 
 docker run -it --rm \
   -v "$(pwd):/code" \
@@ -18,4 +24,4 @@ docker run -it --rm \
   --env QT_X11_NO_MITSHM=1 \
   --name snes-eval \
   snes3 \
-  -c "${CORE_INSTALL} && ${PIP_DEPS} && ${PYTHON} /code/scripts/setup_game.py && ${PYTHON} /code/evaluate.py $@"
+  -c "${CORE_INSTALL} && ${PIP_DEPS} && ${PYTHON} /code/scripts/setup_game.py && ${PYTHON} /code/evaluate.py${EXTRA_ARGS}"
